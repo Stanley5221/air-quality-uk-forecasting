@@ -152,4 +152,4 @@ test holdout, DAQI class imbalance) are discussed in the notebooks and test log.
 | 5 | Model evaluation (RMSE, MAE, DAQI classification) | Done |
 | 6 | SHAP explainability analysis | Done |
 | 7 | Public-health Streamlit dashboard | Done (tested locally; public cloud URL pending) |
-| 8 | Reproducibility and open-source release | Reproducibility log complete; GitHub repo not yet public |
+| 8 | Reproducibility and open-source release | Done — public repo at github.com/Stanley5221/air-quality-uk-forecasting |
