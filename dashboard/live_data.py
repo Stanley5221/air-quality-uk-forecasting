@@ -101,7 +101,12 @@ def _fetch_live_pm25_full(session: requests.Session, lat: float, lon: float) -> 
                 for m in r2.json().get("results", []):
                     sid = m.get("sensorsId")
                     val = m.get("value")
-                    if sid in pm25_sensors and val is not None and val >= 0:
+                    # val > 0 rather than >= 0: a literal 0.0 is essentially never a genuine
+                    # ambient PM2.5 reading and is a common fault/offline signature from
+                    # low-cost community sensors on OpenAQ; treat it as no reading rather than
+                    # letting a dead sensor's "most recent timestamp" beat a real, slightly
+                    # older reading from a reference-grade station.
+                    if sid in pm25_sensors and val is not None and val > 0:
                         ts = m.get("datetime", {})
                         reading_timestamp = ts.get("utc", "") if isinstance(ts, dict) else str(ts)
                         if not best_reading or reading_timestamp > best_reading["reading_timestamp"]:
@@ -137,7 +142,7 @@ def _fetch_openmeteo_air_quality(lat: float, lon: float) -> dict:
             data = r.json().get("current", {})
             val = data.get("pm2_5")
             time_str = data.get("time", "")
-            if val is not None and val >= 0:
+            if val is not None and val > 0:
                 return {
                     "value": float(val),
                     "station_name": "Open-Meteo / Copernicus Model",

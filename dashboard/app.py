@@ -1122,26 +1122,43 @@ Live real-time PM2.5 monitoring and 24-48 hour XGBoost machine learning predicti
         
         m = folium.Map(location=[54.5, -2.5], zoom_start=5.6, tiles=None)
         
-        # Add Dark Mode as the first (default) base layer
+        # Base layers, all via Esri's free, no-API-key-required REST tile services.
+        # (folium's "CartoDB dark_matter"/"CartoDB positron" aliases now require a CARTO API key
+        # -- unconfigured tiles render an "API KEY REQUIRED" watermark -- so Esri is used
+        # instead.) Esri's Canvas/Imagery basemaps ship terrain shading and place-name labels as
+        # two separate tile layers; the label layer for each style is added below as a
+        # same-named "... Labels" overlay checkbox (folium always renders FeatureGroups/overlay
+        # TileLayers as checkboxes, not radio buttons, so a true single-click "switch both at
+        # once" control isn't available without custom JS) -- only the Dark Mode Labels overlay
+        # is checked by default, matching the default Dark Mode base; switching base layers
+        # requires also ticking the matching "... Labels" checkbox.
         folium.TileLayer(
-            tiles="CartoDB dark_matter",
-            name="Dark Mode",
-            control=True,
-            show=True
+            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+            attr="Esri Dark Gray Canvas", name="Dark Mode", control=True, show=True,
         ).add_to(m)
-        
-        # Add Satellite layer
         folium.TileLayer(
             tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-            attr="Esri World Imagery",
-            name="Satellite",
-            control=True,
-            show=False
+            attr="Esri World Imagery", name="Satellite", control=True, show=False,
+        ).add_to(m)
+        folium.TileLayer(
+            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+            attr="Esri Light Gray Canvas", name="Light Mode", control=True, show=False,
         ).add_to(m)
 
-        # Add Light Mode layer
-        folium.TileLayer("CartoDB positron", name="Light Mode", control=True, show=False).add_to(m)
-        
+        # Label overlays (place names, boundaries) -- checkboxes, independent of base switching.
+        folium.TileLayer(
+            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+            attr="Esri Dark Gray Canvas", name="Dark Mode Labels", overlay=True, control=True, show=True,
+        ).add_to(m)
+        folium.TileLayer(
+            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+            attr="Esri World Imagery", name="Satellite Labels", overlay=True, control=True, show=False,
+        ).add_to(m)
+        folium.TileLayer(
+            tiles="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}",
+            attr="Esri Light Gray Canvas", name="Light Mode Labels", overlay=True, control=True, show=False,
+        ).add_to(m)
+
         # Add Layer Control to switch maps
         folium.LayerControl(position="topright").add_to(m)
 
