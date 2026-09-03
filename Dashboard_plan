@@ -1,0 +1,184 @@
+# Dashboard Enhancement Plan: UK Air Quality Risk Forecast
+
+## Goal
+Make the Streamlit dashboard significantly more user-friendly, interactive, and self-explanatory so that **anyone — not just scientists or data experts — can understand what is happening and even run their own predictions.**
+
+---
+
+## What the Dashboard Currently Does vs. What It Will Do
+
+| Feature | Current State | After Enhancement |
+|---|---|---|
+| PM2.5 display | Raw numbers only | Numbers + plain English meaning + color coding |
+| Map | Colored dots, no legend | Colored dots + DAQI legend + city detail cards |
+| Forecast | 24h auto forecast only | + Manual "What If" Predictor tool |
+| Data literacy | No explanations | Tooltips, glossary, and beginner-friendly popups |
+| Mobile | Not optimized | Responsive layout |
+| Health advice | Small colored boxes | Prominent, contextual, city-specific advice |
+| SHAP insights | Not shown | "Why did the model predict this?" explainer section |
+
+---
+
+## Proposed Changes (Section by Section)
+
+---
+
+### SECTION A — Welcome Banner & Beginner Guide
+
+#### [MODIFY] app.py — Add an expandable "What is this dashboard?" intro box
+
+**What it does:**  
+At the very top of the page, add a collapsible beginner guide. When a user first opens the dashboard, it expands automatically. It explains:
+- What PM2.5 is (in plain language: *"tiny pollution particles smaller than a grain of sand"*)
+- What the color bands mean (Low = green = safe, Very High = red = stay indoors)
+- What the forecast means (*"our AI model predicts what air quality will be in 24 hours"*)
+- A one-line summary of the data sources
+
+**Why this matters:**  
+Currently, a regular member of the public sees "7.0 ug/m3" and has no idea if that is good or bad. This fixes that immediately.
+
+---
+
+### SECTION B — Smarter Metric Cards (Current PM2.5 Readings)
+
+#### [MODIFY] app.py — Replace plain metric cards with color-coded, contextual cards
+
+**What it does:**  
+Instead of just showing `7.0 ug/m3 +0.0 in 24h`, each city card will now show:
+- The city name and a weather icon
+- Current PM2.5 value in big, bold text
+- The DAQI band name in large colored text (e.g., **🟢 LOW**)
+- A plain-English one-liner (e.g., *"Air is clean — safe for all activities"*)
+- The 24h forecast change with a clear up/down arrow and what the change means
+
+**Why this matters:**  
+A parent checking if their asthmatic child can go play outside does not know what `3.4 ug/m3` means but they immediately understand **🟢 LOW — Safe for all activities**.
+
+---
+
+### SECTION C — Enhanced Interactive Map
+
+#### [MODIFY] app.py — Add DAQI color legend + city detail click panels
+
+**What it does:**
+1. Add a **color legend** to the side of the map explaining what each circle color means (Green=Low, Yellow=Moderate, Orange=High, Red=Very High).
+2. When a user **clicks a city marker**, display a detailed side panel showing:
+   - Current value, DAQI band, health advice for that city
+   - 24h forecast
+   - A mini trend sparkline showing the last 24 hours of historical readings for that city
+3. Make circle sizes more visible — currently small circles are hard to see.
+
+**Why this matters:**  
+Currently, clicking a city shows a raw popup with numbers. A non-expert needs context alongside those numbers.
+
+---
+
+### SECTION D — 🆕 "What-If" Manual Predictor Tool (Most Impactful Feature)
+
+#### [NEW] Custom Prediction Widget
+
+**What it does:**  
+Add a completely new interactive section titled **"Run Your Own Prediction"** where any user can:
+
+1. Select a city from a dropdown
+2. Use sliders to manually set:
+   - **Current PM2.5** (0–80 µg/m³) — with a label explaining: *"What is the pollution level right now?"*
+   - **Wind Speed** (0–30 m/s) — with a label: *"Higher wind = pollution disperses faster"*
+   - **Temperature** (−5 to 35°C)
+   - **Humidity** (0–100%)
+   - **Hour of Day** (0–23) — with a label: *"Rush hour = more traffic pollution"*
+3. Click a big **"Predict Air Quality in 24 Hours"** button
+4. Immediately see the model's forecast: a colored DAQI result box, the predicted PM2.5 number, and a plain-English explanation of the prediction
+
+**Why this matters:**  
+This turns the dashboard from a passive display into an **interactive tool**. A student, a teacher, a health researcher, or even your supervisor can experiment: *"What happens if wind drops to 0? What if I change the time to rush hour?"* — and instantly see the AI model respond. This is the single most impressive and educational feature you can add.
+
+---
+
+### SECTION E — "Why Did the Model Predict This?" SHAP Explainer
+
+#### [NEW] Per-city SHAP explanation section
+
+**What it does:**  
+Below the forecast results (both automatic and manual), add a visual SHAP explanation showing:
+- A small horizontal bar chart of the **top 5 factors** that drove this particular prediction
+- Each bar is labeled in plain English (e.g., *"Yesterday's air quality (pm25_lag_24)"*, *"Wind speed"*, *"Time of day"*)
+- A text summary: *"The model predicted Moderate risk mainly because yesterday's PM2.5 was high and wind speeds are low."*
+
+**Why this matters:**  
+SHAP is one of your dissertation's core deliverables. Showing it live in the dashboard demonstrates technical depth and directly addresses the "Explainable" part of your project title. Your supervisor will be very impressed to see this in the live app.
+
+---
+
+### SECTION F — City-Specific Health Advice Panel
+
+#### [MODIFY] app.py — Replace small colored DAQI boxes with prominent city-specific advice cards
+
+**What it does:**  
+Instead of 4 generic DAQI color boxes at the bottom, show **5 city-specific health advisory cards**, one per city, that dynamically say things like:
+
+> **🟡 Manchester — Moderate Risk Today**  
+> *Forecast: Rising to 5.5 µg/m3 in 24 hours.*  
+> People with asthma or heart conditions should avoid prolonged outdoor exercise today.
+
+Each card is color-coded to match its DAQI band and uses emojis and plain language.
+
+---
+
+### SECTION G — Trend History Chart (Last 24 Hours)
+
+#### [NEW] Historical trend chart per city
+
+**What it does:**  
+Add a new section: **"How has air quality changed in the last 24 hours?"**  
+A line chart (using Plotly) showing the PM2.5 readings for all 5 cities over the past 24 hours from the AURN historical data — this gives the user a sense of the trend direction and context for the current reading and forecast.
+
+---
+
+### SECTION H — Dashboard Sidebar Improvements
+
+#### [MODIFY] app.py — Improve sidebar
+
+**What it does:**
+- Add a **"Data freshness" indicator** (green = data fetched < 30 mins ago, yellow = 30-60 mins, red = > 60 mins)
+- Add a **"How to read this dashboard"** quick help guide button in the sidebar
+- Add a **City Selector** in the sidebar so users can focus the main view on one city at a time
+
+---
+
+## Summary of All New Features
+
+| # | Feature | Difficulty | Dissertation Value | Public User Value |
+|---|---|---|---|---|
+| A | Beginner guide banner | Easy | ⭐⭐ | ⭐⭐⭐⭐⭐ |
+| B | Color-coded smart metric cards | Easy | ⭐⭐ | ⭐⭐⭐⭐⭐ |
+| C | Map legend + city click panels | Medium | ⭐⭐⭐ | ⭐⭐⭐⭐ |
+| D | What-If Manual Predictor | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| E | SHAP Explainer widget | Medium | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| F | City-specific health advice cards | Easy | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| G | Last 24h historical trend chart | Medium | ⭐⭐⭐ | ⭐⭐⭐⭐ |
+| H | Sidebar improvements | Easy | ⭐⭐ | ⭐⭐⭐ |
+
+---
+
+## Files That Will Be Modified
+
+### [MODIFY] [app.py](file:///c:/Users/stanl/OneDrive/Desktop/STANLEY/Msc%20Data%20Science/project/air-quality-uk-forecasting/dashboard/app.py)
+All UI changes: sections A, B, C, F, G, H + the What-If predictor (D) and SHAP widget (E) will be added here.
+
+### [MODIFY] [live_data.py](file:///c:/Users/stanl/OneDrive/Desktop/STANLEY/Msc%20Data%20Science/project/air-quality-uk-forecasting/dashboard/live_data.py)
+- Add a `predict_custom(city, pm25, wind_speed, temp, humidity, hour)` function to power the What-If tool.
+- Add a `get_shap_values(feature_row)` function to power the SHAP explainer.
+- Add a `get_city_history(station, hours=24)` function for the trend chart.
+
+---
+
+## Verification Plan
+
+After implementation:
+1. Run `streamlit run dashboard/app.py` and visually confirm all sections render correctly
+2. Test the What-If predictor with extreme slider values (PM2.5=0, PM2.5=80) and confirm DAQI bands update correctly
+3. Test the SHAP chart shows 5 bars with readable labels
+4. Confirm the map legend is visible and map circles are clickable with detail panels
+5. Confirm all text is plain-English and understandable to a non-scientist
+
