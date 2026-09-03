@@ -1,0 +1,24 @@
+test_id,description,expected_result,actual_result,pass_fail,notes
+T01,Cleaning notebook output shape,87725 rows x 4 columns (city+o3+no2+pm25),87725 rows x 4 columns,PASS,Verified from notebook Cell 8 output
+T02,Cleaning notebook city count,5 unique cities,5 cities (Birmingham A4540 Roadside / Edinburgh St Leonards / Leeds Centre / London Marylebone Road / Manchester Piccadilly),PASS,All 5 AURN stations present
+T03,Cleaning notebook date range,2023-01-01 to 2025-01-01,2023-01-01 01:00 to 2025-01-01 00:00,PASS,24:00 midnight convention correctly shifted
+T04,Feature engineering output shape,>80000 rows x 22 columns,81028 rows x 22 columns,PASS,Verified from notebook Cell 9 output
+T05,Feature engineering target column,pm25_next24h present and non-null for all rows,81028 / 87715 valid (92.4%),PASS,Last 24h per city dropped as expected
+T06,Feature engineering lag columns,pm25_lag_1 pm25_lag_2 pm25_lag_3 pm25_lag_24 present,All 4 lag columns present in features_engineered.csv,PASS,Checked column list in Cell 8
+T07,Random Forest model file exists,models/random_forest.pkl > 0 bytes,1111240865 bytes,PASS,Model serialised with joblib
+T08,XGBoost model file exists,models/xgboost.json > 0 bytes,693911 bytes,PASS,Saved with model.save_model()
+T09,LSTM model file exists,models/lstm.keras > 0 bytes,437188 bytes,PASS,Saved with model.save()
+T10,Random Forest test RMSE,RMSE < 8 ug/m3 on 2024-Q4 test set,5.252 ug/m3,PASS,Below acceptable threshold
+T11,XGBoost test RMSE,RMSE < 8 ug/m3 on 2024-Q4 test set,5.143 ug/m3,PASS,Best performing model
+T12,LSTM test RMSE,RMSE < 8 ug/m3 on 2024-Q4 test set,6.405 ug/m3,PASS,Higher than tree models as expected
+T13,XGBoost beats Random Forest,XGBoost RMSE < RF RMSE,5.143 < 5.252,PASS,XGBoost selected as primary model
+T14,DAQI Low band classification precision,Precision >= 0.80 for Low band (XGBoost),0.85,PASS,Low is dominant class
+T15,SHAP global bar chart saved,models/shap_global_bar.png exists and > 0 bytes,48338 bytes,PASS,Top feature is pm25 (mean SHAP 0.937)
+T16,Waterfall plots generated,At least 1 waterfall plot for high-risk event (PM2.5 > 24),2 waterfall plots saved,PASS,Predicted PM2.5 24.8 and 24.7 ug/m3
+T17,live_data.py feature vector shape,get_forecast() returns DataFrame with 5 rows x 23 columns,5 rows x 23 columns,PASS,All 5 cities present; column count updated after 48h forecast + weather widget fields were added
+T18,Dashboard DAQI function correctness,daqi_band(5) = Low / daqi_band(15) = Moderate / daqi_band(30) = High,Low / Moderate / High,PASS,Thresholds verified against UK DAQI standard
+T19,Model comparison chart saved,models/model_comparison_chart.png exists,37096 bytes,PASS,Bar chart shows all 3 models
+T20,Forecast vs actual chart saved,models/forecast_vs_actual.png exists,111678 bytes,PASS,London Oct 2024 7-day window
+T21,predict_custom() time-alignment correctness,reference_datetime = target_datetime minus 24h; predictions close to real historical PM2.5,Verified against 20 real historical AURN readings across all 5 cities (2024-Q4 window): MAE 2.46 ug/m3 vs official XGBoost test MAE 3.78 ug/m3,PASS,Fixes a bug where features were built at target_datetime instead of target_datetime-24h causing predictions to describe the wrong day
+T22,get_forecast() 48h recursive stage time-alignment,Stage-2 reference time = now+24h (not now+48h); 24h to 48h forecast progresses smoothly per city,Verified smooth progression e.g. London 6.2 to 6.0 ug/m3 Birmingham 4.6 to 3.9 ug/m3,PASS,Same fix class as T21 applied to the 48h recursive forecast used on the Live Forecast Dashboard tab
+T23,XGBoost DAQI class-imbalance evaluation,macro-F1 and balanced accuracy computed on 2024-Q4 test set (n=10494),Macro-F1 0.31 Balanced accuracy 0.31 vs raw accuracy 0.802; High-band recall 0.01 Very-High-band recall 0.00,PASS,Confirms severe class-imbalance impact quantitatively rather than only qualitatively; see models/daqi_confusion_matrix.png and models/class_imbalance_results.json

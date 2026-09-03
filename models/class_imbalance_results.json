@@ -1,0 +1,43 @@
+{
+  "overall_accuracy": 0.8017,
+  "macro_f1": 0.3136,
+  "balanced_accuracy": 0.31,
+  "confusion_matrix": [
+    [
+      7906,
+      446,
+      1,
+      0
+    ],
+    [
+      1275,
+      503,
+      4,
+      0
+    ],
+    [
+      82,
+      270,
+      4,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      0
+    ]
+  ],
+  "labels": [
+    "Low",
+    "Moderate",
+    "High",
+    "Very High"
+  ],
+  "supports": [
+    8353,
+    1782,
+    356,
+    3
+  ]
+}
